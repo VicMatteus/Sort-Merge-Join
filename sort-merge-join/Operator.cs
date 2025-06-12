@@ -19,7 +19,7 @@ class Operator
     public Operator(Table table1, Table table2, string keyOnTable1, string keyOnTable2)
     {
         //Cria a pasta da execução atual -> Isso será movido para o operador.
-        string executionDataDirectory = DateTime.Now.ToString(new CultureInfo("de-DE")).Replace(" ", "-")+"/";
+        string executionDataDirectory = DateTime.Now.ToString(new CultureInfo("de-DE")).Replace(" ", "-") + "/";
         RunT1Directory = rootDirectory + executionDataDirectory + "runsT1/";
         RunT2Directory = rootDirectory + executionDataDirectory + "runsT2/";
 
@@ -54,12 +54,23 @@ class Operator
         string lineAux = "";
         int writtenTupleCounter = 0;
         int writtenPageCounter = 0;
+        int readTupleCounter = 0;
+        int readPageCounter = 0;
         int run_counter = 0;
+        StringfiedTable AuxStructure;
+
+        Console.WriteLine($"*---Ordenando tabela 1: {table_name}---*");
 
         //*Lê tabela 1 para a memória
         DiskIterator iterator = new DiskIterator();
         PageLoadReference reference = iterator.ReadToMemo(this.Table1, 0);
+
         Table1 = reference.Table;
+        readPageCounter += reference.PageCounter; //Atualiza a quantidade de paginas lidas do disco
+        readTupleCounter = reference.TupleCounter;
+        Console.WriteLine($"[PARCIAL] Quantidade de páginas LIDAS na última ida ao disco: {readPageCounter}");
+        Console.WriteLine($"[PARCIAL] Quantidade de tuplas LIDAS na última ida ao disco {1}: {readPageCounter * 10 + readTupleCounter}");
+
 
         //Se vazio, interrompe.
         if (Table1.Tuples.Count == 0)
@@ -71,100 +82,67 @@ class Operator
         //Lê e ordena iterativamente a tabela.
         while (!reference.IsEndOfFile)
         {
-
-            //Ordena as paginas em memória e devolve em Table1.Tuples
-            AuxClass.SetComparisonIndex(table_name, column_name);
-            Table1.Tuples.Sort(AuxClass.SortTuples);
-
             run_counter++;
-            //Escreve a run atual no arquivo temporário
-            foreach (Array tuple in Table1.Tuples)
-            {
-                //Concatena as colunas
-                for (int i = 0; i < tuple.Length - 1; i++)
-                {
-                    lineAux += tuple.GetValue(i) + ", ";
-                }
-                lineAux += tuple.GetValue(tuple.Length - 1);
-                result += lineAux + "\n"; // salva a tupla pronta em uma só string
-                lineAux = "";
 
-                writtenTupleCounter++;
-                if (writtenTupleCounter >= 10)
-                {
-                    writtenPageCounter++;
-                    writtenTupleCounter = 0;
-                }
-            }
-            // Console.WriteLine(result);
-            Console.WriteLine($"Quantidade de paginas escritas nesta run: {writtenPageCounter}");
-            Console.WriteLine($"Quantidade de tuplas escritas nesta run: {writtenPageCounter * 10 + writtenTupleCounter}");
+            //Ordena as p´aginas em memoria
+            Table1.Sort(column_name);
+
+            //Monta a string com o conjunto de tuplas ordenadas
+            AuxStructure = AuxClass.GetSortedString(Table1.Tuples);
+            result = AuxStructure.Result;
+            writtenPageCounter += AuxStructure.WrittenPageCounter;
+            writtenTupleCounter = AuxStructure.WrittenTupleCounter;
+
+            Console.WriteLine($"[PARCIAL] Quantidade de tuplas ESCRITAS na última run {run_counter}: {writtenPageCounter * 10 + writtenTupleCounter}");
 
             //Escreve as páginas que leu(4, no máximo) em um arquivo temporário ordenado(até 40 tuplas) - run_N_tabela.txt
             File.AppendAllText(RunT1Directory + $"run_{run_counter}_{table_name}.txt", result);
             result = "";
 
+            Table1.FreeFromMemo(); //Garante que não se contamine com tuplas da run passada
             reference = iterator.ReadToMemo(Table1, writtenPageCounter);
+
+            //Atualiza as metricas de leitura
+            Table1 = reference.Table;
+            readPageCounter += reference.PageCounter;
+            readTupleCounter = reference.TupleCounter;
+            Console.WriteLine($"[PARCIAL] Quantidade acumulada de páginas LIDAS com a última run {run_counter}: {readPageCounter}");
+            Console.WriteLine($"[PARCIAL] Quantidade de tuplas LIDAS na última página da run {run_counter}: {readTupleCounter}");
+
         }
 
-        //Realiza a ordenação do último bloco lido até o fim do arquivo
-        // if (reference.Tuples.Count != 0)
-        // {
-        //     run_counter++;
+        //Realiza a ordenação do último bloco lido até o fim do arquivo - codigo repetido, corrigir
+        if (Table1.Tuples.Count != 0)
+        {
+            run_counter++;
 
-        //     //Passo a tabela e a coluna da junção para realizar a ordenação baseado nela.
-        //     AuxClass.SetComparisonIndex(table_name, column_name);
-        //     reference.Tuples.Sort(AuxClass.SortTuples);
-        //     foreach (Array tuple in reference.Tuples)
-        //     {
-        //         //Concatena as colunas
-        //         for (int i = 0; i < tuple.Length - 1; i++)
-        //         {
-        //             lineAux += tuple.GetValue(i) + ", ";
-        //         }
-        //         lineAux += tuple.GetValue(tuple.Length - 1);
-        //         result += lineAux + "\n"; // salva a tupla pronta em uma só string
-        //         lineAux = "";
+            //Ordena as p´aginas em memoria
+            Table1.Sort(column_name);
 
-        //         writtenTupleCounter++;
-        //         if (writtenTupleCounter >= 10)
-        //         {
-        //             writtenPageCounter++;
-        //             writtenTupleCounter = 0;
-        //         }
-        //     }
-        //     Console.WriteLine(result);
+            //Monta a string com o conjunto de tuplas ordenadas
+            AuxStructure = AuxClass.GetSortedString(Table1.Tuples);
+            result = AuxStructure.Result;
+            writtenPageCounter += AuxStructure.WrittenPageCounter;
+            writtenTupleCounter = AuxStructure.WrittenTupleCounter;
+            Console.WriteLine($"[PARCIAL] Quantidade de tuplas escritas na última página da run{run_counter}: {writtenTupleCounter}");
 
-        //     //Escreve as páginas que leu(4, no máximo) em um arquivo temporário ordenado, separado em blocos de tuplas, onde cada bloco = 1 página.
-        //     File.AppendAllText(RunT2Directory + $"run_{run_counter}.txt", result);
-        // }
+
+            //Escreve as páginas que leu(4, no máximo) em um arquivo temporário ordenado(até 40 tuplas) - run_N_tabela.txt
+            File.AppendAllText(RunT1Directory + $"run_{run_counter}_{table_name}.txt", result);
+            result = "";
+            Table1.FreeFromMemo();
+        }
+
+        Console.WriteLine("\n|---Resumo da ordenação da tabela 1---|");
+        Console.WriteLine($"[FINAL] Quantidade de páginas(cheias) ESCRITAS na operação: {writtenPageCounter}");
+        Console.WriteLine($"[FINAL] Quantidade de tuplas ESCRITAS na última página(não cheia): {writtenTupleCounter}");
+        Console.WriteLine($"[FINAL] Quantidade total tuplas ESCRITAS na operação: {writtenPageCounter * 10 + writtenTupleCounter}");
+        Console.WriteLine($"[FINAL] Quantidade total páginas LIDAS na operação: {readPageCounter}"); //Confusão de nomenclatura e gerou essa nóia de ser sempre a quantidade de páginas cheia + o quebrado das tuplas. Aqui tem que ter mais 1.
+        Console.WriteLine($"[FINAL] Quantidade total tuplas LIDAS na operação: {readPageCounter * 10 + readTupleCounter}");
+        Console.WriteLine($"*---Final das runs da tabela 1---*");
     }
 
-    // public Array GetSortedString(Array tuples)
-    // {
-    //     string lineAux = "";
-    //     string result = "";
-    //     int writtenPageCounter = 0;
-    //     int writtenTupleCounter = 0;
+    public void MergeRuns()
+    {}
 
-    //     foreach (Array tuple in Table1.Tuples)
-    //     {
-    //         //Concatena as colunas
-    //         for (int i = 0; i < tuple.Length - 1; i++)
-    //         {
-    //             lineAux += tuple.GetValue(i) + ", ";
-    //         }
-    //         lineAux += tuple.GetValue(tuple.Length - 1);
-    //         result += lineAux + "\n"; // salva a tupla pronta em uma só string
-    //         lineAux = "";
-
-    //         writtenTupleCounter++;
-    //         if (writtenTupleCounter >= 10)
-    //         {
-    //             writtenPageCounter++;
-    //             writtenTupleCounter = 0;
-    //         }
-    //     }
-    //     return [result, writtenPageCounter, writtenTupleCounter];
-    // }
 }

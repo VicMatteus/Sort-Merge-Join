@@ -12,7 +12,8 @@ namespace sort_merge_join
             //File.Exists(Directory.GetCurrentDirectory() + "/uva.csv")
 
             bool isLinux = true;
-            Operator op = new Operator(new Table("vinho.csv"), new Table("uva.csv"), "uva_id", "uva_id");
+            // Operator op = new Operator(new Table("vinho.csv"), new Table("uva.csv"), "uva_id", "uva_id");
+            Operator op = new Operator(new Table("vinho.csv"), new Table("uva.csv"), "vinho_id", "pais_origem_id");
             op.DoOperation();
 
             /*

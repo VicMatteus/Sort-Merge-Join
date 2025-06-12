@@ -15,9 +15,11 @@ public class Table
     }
 
     //Ordena as tuplas atuais
-    public void Sort()
+    public void Sort(string keyColumnName)
     {
-
+        //Ordena as paginas em memória
+        AuxClass.SetComparisonIndex(Name, keyColumnName);
+        Tuples.Sort(AuxClass.SortTuples);
     }
 
     //Verifica se tem espaço na página e adiciona a tupla
@@ -30,7 +32,8 @@ public class Table
         }
 
         Tuples.Add(tuple);
-        if (Tuples.Count >= 10)
+        TupleCounter++;
+        if (TupleCounter >= 10)
         {
             PageCounter++;
             TupleCounter = 0;

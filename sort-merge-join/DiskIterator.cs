@@ -48,7 +48,9 @@ public class DiskIterator
                 readPageCounter++;  //Paginas lidas na iteração atual 0 - 4
                 actualPage++;       //Paginas lidas ao todo no arquivo (offset)
                 tupleCounter = 0;
-                
+
+                Console.WriteLine($"Pagina lida para {tableName}!");
+
                 if (readPageCounter >= 4)
                 {
                     break;
