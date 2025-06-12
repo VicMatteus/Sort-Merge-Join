@@ -12,3 +12,7 @@ C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\obj\Debug\net9.0\re
 C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\obj\Debug\net9.0\sort-merge-join.pdb
 C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\obj\Debug\net9.0\sort-merge-join.genruntimeconfig.cache
 C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\obj\Debug\net9.0\ref\sort-merge-join.dll
+C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\obj\Debug\net9.0\sort-merge-join.sourcelink.json
+C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\bin\Debug\net9.0\pais.csv
+C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\bin\Debug\net9.0\uva.csv
+C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\bin\Debug\net9.0\vinho.csv

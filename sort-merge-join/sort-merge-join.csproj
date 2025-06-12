@@ -7,5 +7,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
-
+    <ItemGroup>
+        <Content Include="*.csv" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
 </Project>
