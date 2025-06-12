@@ -1,5 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using System.Globalization;
+
 namespace sort_merge_join
 {
     internal class Program
@@ -10,10 +12,12 @@ namespace sort_merge_join
             //File.Exists(Directory.GetCurrentDirectory() + "/uva.csv")
 
             bool isLinux = true;
+            Operator op = new Operator(new Table("vinho.csv"), new Table("uva.csv"), "uva_id", "uva_id");
 
-            string table_name = "uva.csv";
-            string column_name = "pais_origem_id";
-            string run_file_path    = isLinux ? @"/home/vitor/tmp/sort_merge_join/" : @"C:\temp\sort_merge_join\"; //Windows
+
+            string table_name = "vinho.csv";
+            string column_name = "pais_producao_id";
+            string run_file_path = isLinux ? @"/home/vitor/tmp/sort_merge_join/" : @"C:\temp\sort_merge_join\"; //Windows
             string result = "";
             string lineAux = "";
             int writtenTupleCounter = 0;
@@ -22,22 +26,17 @@ namespace sort_merge_join
 
             //*Lê uma tabela para a memória
             DiskIterator iterator = new DiskIterator();
-
-            //Lê um máximo de tuplas para a memória
             PageLoadReference reference = iterator.ReadToMemo(table_name, 0);
 
-            // Problema: não irá montar o resultado caso acabe na primeira leitura
-            // e não irá mostrar o último resultado caso acabe dentro do laço
-
-            //Quando ler um end of file, é um indictivo para ler realizar mais uma iteração 
+            //Se vazio, interrompe.
             if (reference.Tuples.Count == 0)
             {
                 Console.WriteLine("Tabela vazia para a seleção");
                 return;
             }
 
-
-            while (!reference.IsEndOfFile) 
+            //Lê e ordena iterativamente a tabela.
+            while (!reference.IsEndOfFile)
             {
                 run_counter++;
 
@@ -64,10 +63,10 @@ namespace sort_merge_join
                 }
                 Console.WriteLine(result);
 
-                //Escreve as páginas que leu(4, no máximo) em um arquivo temporário ordenado, separado em blocos de tuplas, onde cada bloco = 1 página.
-                File.AppendAllText(run_file_path + $"run_{run_counter}.txt", result);
+                //Escreve as páginas que leu(4, no máximo) em um arquivo temporário ordenado(até 40 tuplas) - run_N_tabela.txt
+                File.AppendAllText(run_file_path + $"run_{run_counter}_{table_name}.txt", result);
                 result = "";
-                
+
                 reference = iterator.ReadToMemo(table_name, writtenPageCounter);
             }
 

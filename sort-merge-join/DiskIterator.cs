@@ -8,9 +8,6 @@ public class DiskIterator
             
         if (!File.Exists(table_path))
             throw new FileNotFoundException($"Arquivo de dados {tableName} não encontrado em {table_path}");
-
-        //Nome da coluna que será a chave da seleção
-        string keyColumnName = "pais_id";
             
         int tupleCounter = 0;
         int readPageCounter = 0;
@@ -24,9 +21,6 @@ public class DiskIterator
             
         //Read the header
         line = reader.ReadLine(); 
-        partLine = line.Split(",");
-        int keyColumnIndex = Array.IndexOf(partLine, keyColumnName);
-        //Look up for the key column index
             
         while ((line = reader.ReadLine()) != null)
         {
