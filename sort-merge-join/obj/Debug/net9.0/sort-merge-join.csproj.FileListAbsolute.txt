@@ -1,0 +1,14 @@
+C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\bin\Debug\net9.0\sort-merge-join.exe
+C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\bin\Debug\net9.0\sort-merge-join.deps.json
+C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\bin\Debug\net9.0\sort-merge-join.runtimeconfig.json
+C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\bin\Debug\net9.0\sort-merge-join.dll
+C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\bin\Debug\net9.0\sort-merge-join.pdb
+C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\obj\Debug\net9.0\sort-merge-join.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\obj\Debug\net9.0\sort-merge-join.AssemblyInfoInputs.cache
+C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\obj\Debug\net9.0\sort-merge-join.AssemblyInfo.cs
+C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\obj\Debug\net9.0\sort-merge-join.csproj.CoreCompileInputs.cache
+C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\obj\Debug\net9.0\sort-merge-join.dll
+C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\obj\Debug\net9.0\refint\sort-merge-join.dll
+C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\obj\Debug\net9.0\sort-merge-join.pdb
+C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\obj\Debug\net9.0\sort-merge-join.genruntimeconfig.cache
+C:\Users\vitor\RiderProjects\sort-merge-join\sort-merge-join\obj\Debug\net9.0\ref\sort-merge-join.dll
