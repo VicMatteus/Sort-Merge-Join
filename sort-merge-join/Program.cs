@@ -13,8 +13,9 @@ namespace sort_merge_join
 
             bool isLinux = true;
             Operator op = new Operator(new Table("vinho.csv"), new Table("uva.csv"), "uva_id", "uva_id");
+            op.DoOperation();
 
-
+            /*
             string table_name = "vinho.csv";
             string column_name = "pais_producao_id";
             string run_file_path = isLinux ? @"/home/vitor/tmp/sort_merge_join/" : @"C:\temp\sort_merge_join\"; //Windows
@@ -101,7 +102,7 @@ namespace sort_merge_join
                 //Escreve as páginas que leu(4, no máximo) em um arquivo temporário ordenado, separado em blocos de tuplas, onde cada bloco = 1 página.
                 File.AppendAllText(run_file_path + $"run_{run_counter}.txt", result);
             }
-            
+            */
         }
     }
 }

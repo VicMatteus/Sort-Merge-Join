@@ -19,7 +19,7 @@ class Operator
     public Operator(Table table1, Table table2, string keyOnTable1, string keyOnTable2)
     {
         //Cria a pasta da execução atual -> Isso será movido para o operador.
-        string executionDataDirectory = DateTime.Now.ToString(new CultureInfo("de-DE")).Replace(" ", "-");
+        string executionDataDirectory = DateTime.Now.ToString(new CultureInfo("de-DE")).Replace(" ", "-")+"/";
         RunT1Directory = rootDirectory + executionDataDirectory + "runsT1/";
         RunT2Directory = rootDirectory + executionDataDirectory + "runsT2/";
 
@@ -58,10 +58,11 @@ class Operator
 
         //*Lê tabela 1 para a memória
         DiskIterator iterator = new DiskIterator();
-        PageLoadReference reference = iterator.ReadToMemo(table_name, 0);
+        PageLoadReference reference = iterator.ReadToMemo(this.Table1, 0);
+        Table1 = reference.Table;
 
         //Se vazio, interrompe.
-        if (reference.Tuples.Count == 0)
+        if (Table1.Tuples.Count == 0)
         {
             Console.WriteLine("Tabela vazia para a seleção");
             return;
@@ -70,12 +71,14 @@ class Operator
         //Lê e ordena iterativamente a tabela.
         while (!reference.IsEndOfFile)
         {
-            run_counter++;
 
-            //Passo a tabela e a coluna da junção para realizar a ordenação baseado nela.
+            //Ordena as paginas em memória e devolve em Table1.Tuples
             AuxClass.SetComparisonIndex(table_name, column_name);
-            reference.Tuples.Sort(AuxClass.SortTuples);
-            foreach (Array tuple in reference.Tuples)
+            Table1.Tuples.Sort(AuxClass.SortTuples);
+
+            run_counter++;
+            //Escreve a run atual no arquivo temporário
+            foreach (Array tuple in Table1.Tuples)
             {
                 //Concatena as colunas
                 for (int i = 0; i < tuple.Length - 1; i++)
@@ -93,47 +96,75 @@ class Operator
                     writtenTupleCounter = 0;
                 }
             }
-            Console.WriteLine(result);
+            // Console.WriteLine(result);
+            Console.WriteLine($"Quantidade de paginas escritas nesta run: {writtenPageCounter}");
+            Console.WriteLine($"Quantidade de tuplas escritas nesta run: {writtenPageCounter * 10 + writtenTupleCounter}");
 
             //Escreve as páginas que leu(4, no máximo) em um arquivo temporário ordenado(até 40 tuplas) - run_N_tabela.txt
             File.AppendAllText(RunT1Directory + $"run_{run_counter}_{table_name}.txt", result);
             result = "";
 
-            reference = iterator.ReadToMemo(table_name, writtenPageCounter);
+            reference = iterator.ReadToMemo(Table1, writtenPageCounter);
         }
 
         //Realiza a ordenação do último bloco lido até o fim do arquivo
-        if (reference.Tuples.Count != 0)
-        {
-            run_counter++;
+        // if (reference.Tuples.Count != 0)
+        // {
+        //     run_counter++;
 
-            //Passo a tabela e a coluna da junção para realizar a ordenação baseado nela.
-            AuxClass.SetComparisonIndex(table_name, column_name);
-            reference.Tuples.Sort(AuxClass.SortTuples);
-            foreach (Array tuple in reference.Tuples)
-            {
-                //Concatena as colunas
-                for (int i = 0; i < tuple.Length - 1; i++)
-                {
-                    lineAux += tuple.GetValue(i) + ", ";
-                }
-                lineAux += tuple.GetValue(tuple.Length - 1);
-                result += lineAux + "\n"; // salva a tupla pronta em uma só string
-                lineAux = "";
+        //     //Passo a tabela e a coluna da junção para realizar a ordenação baseado nela.
+        //     AuxClass.SetComparisonIndex(table_name, column_name);
+        //     reference.Tuples.Sort(AuxClass.SortTuples);
+        //     foreach (Array tuple in reference.Tuples)
+        //     {
+        //         //Concatena as colunas
+        //         for (int i = 0; i < tuple.Length - 1; i++)
+        //         {
+        //             lineAux += tuple.GetValue(i) + ", ";
+        //         }
+        //         lineAux += tuple.GetValue(tuple.Length - 1);
+        //         result += lineAux + "\n"; // salva a tupla pronta em uma só string
+        //         lineAux = "";
 
-                writtenTupleCounter++;
-                if (writtenTupleCounter >= 10)
-                {
-                    writtenPageCounter++;
-                    writtenTupleCounter = 0;
-                }
-            }
-            Console.WriteLine(result);
+        //         writtenTupleCounter++;
+        //         if (writtenTupleCounter >= 10)
+        //         {
+        //             writtenPageCounter++;
+        //             writtenTupleCounter = 0;
+        //         }
+        //     }
+        //     Console.WriteLine(result);
 
-            //Escreve as páginas que leu(4, no máximo) em um arquivo temporário ordenado, separado em blocos de tuplas, onde cada bloco = 1 página.
-            File.AppendAllText(RunT2Directory + $"run_{run_counter}.txt", result);
-        }
+        //     //Escreve as páginas que leu(4, no máximo) em um arquivo temporário ordenado, separado em blocos de tuplas, onde cada bloco = 1 página.
+        //     File.AppendAllText(RunT2Directory + $"run_{run_counter}.txt", result);
+        // }
     }
 
-    
+    // public Array GetSortedString(Array tuples)
+    // {
+    //     string lineAux = "";
+    //     string result = "";
+    //     int writtenPageCounter = 0;
+    //     int writtenTupleCounter = 0;
+
+    //     foreach (Array tuple in Table1.Tuples)
+    //     {
+    //         //Concatena as colunas
+    //         for (int i = 0; i < tuple.Length - 1; i++)
+    //         {
+    //             lineAux += tuple.GetValue(i) + ", ";
+    //         }
+    //         lineAux += tuple.GetValue(tuple.Length - 1);
+    //         result += lineAux + "\n"; // salva a tupla pronta em uma só string
+    //         lineAux = "";
+
+    //         writtenTupleCounter++;
+    //         if (writtenTupleCounter >= 10)
+    //         {
+    //             writtenPageCounter++;
+    //             writtenTupleCounter = 0;
+    //         }
+    //     }
+    //     return [result, writtenPageCounter, writtenTupleCounter];
+    // }
 }
