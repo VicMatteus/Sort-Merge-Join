@@ -6,11 +6,13 @@ public class PageLoadReference
     public List<Array> Tuples { get; set; } = new List<Array>();
     public int TupleCounter { get; set; }
     public int PageCounter { get; set; }
+    public bool IsEndOfFile { get; set; } = false;
 
-    public PageLoadReference(List<Array> tuples, int tupleCounter, int pageCounter)
+    public PageLoadReference(List<Array> tuples, int pageCounter, int tupleCounter, bool isEndOfFile)
     {
         TupleCounter = tupleCounter;
         PageCounter = pageCounter;
         Tuples = tuples;
+        IsEndOfFile = isEndOfFile;
     }
 }
