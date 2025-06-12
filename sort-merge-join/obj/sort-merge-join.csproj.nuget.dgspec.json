@@ -1,25 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\vitor\\RiderProjects\\sort-merge-join\\sort-merge-join\\sort-merge-join.csproj": {}
+    "/home/vitor/Documentos/dev/ufc/Sort-Merge-Join/sort-merge-join/sort-merge-join.csproj": {}
   },
   "projects": {
-    "C:\\Users\\vitor\\RiderProjects\\sort-merge-join\\sort-merge-join\\sort-merge-join.csproj": {
+    "/home/vitor/Documentos/dev/ufc/Sort-Merge-Join/sort-merge-join/sort-merge-join.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\vitor\\RiderProjects\\sort-merge-join\\sort-merge-join\\sort-merge-join.csproj",
+        "projectUniqueName": "/home/vitor/Documentos/dev/ufc/Sort-Merge-Join/sort-merge-join/sort-merge-join.csproj",
         "projectName": "sort-merge-join",
-        "projectPath": "C:\\Users\\vitor\\RiderProjects\\sort-merge-join\\sort-merge-join\\sort-merge-join.csproj",
-        "packagesPath": "C:\\Users\\vitor\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\vitor\\RiderProjects\\sort-merge-join\\sort-merge-join\\obj\\",
+        "projectPath": "/home/vitor/Documentos/dev/ufc/Sort-Merge-Join/sort-merge-join/sort-merge-join.csproj",
+        "packagesPath": "/home/vitor/.nuget/packages/",
+        "outputPath": "/home/vitor/Documentos/dev/ufc/Sort-Merge-Join/sort-merge-join/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\vitor\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "/home/vitor/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
+          "/usr/lib/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -36,7 +37,7 @@
         "restoreAuditProperties": {
           "enableAudit": "true",
           "auditLevel": "low",
-          "auditMode": "all"
+          "auditMode": "direct"
         },
         "SdkAnalysisLevel": "9.0.100"
       },
@@ -59,7 +60,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Users\\vitor\\.dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/9.0.107/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
