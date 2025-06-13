@@ -9,6 +9,7 @@ class Operator
     private string rootDirectory { get; set; } = isLinux ? @"/home/vitor/tmp/sort_merge_join/" : @"C:\temp\sort_merge_join\"; //Windows
     private string RunT1Directory { get; set; }
     private string RunT2Directory { get; set; }
+    private string SortedDirectory { get; set; }
 
     public Table Table1 { get; set; }
     public Table Table2 { get; set; }
@@ -20,14 +21,17 @@ class Operator
     {
         //Cria a pasta da execução atual -> Isso será movido para o operador.
         string executionDataDirectory = DateTime.Now.ToString(new CultureInfo("de-DE")).Replace(" ", "-").Replace(":", ".");
-        RunT1Directory = Path.Combine(rootDirectory, executionDataDirectory, "runsT1");
-        RunT2Directory = Path.Combine(rootDirectory, executionDataDirectory, "runsT2");
+        RunT1Directory  = Path.Combine(rootDirectory, executionDataDirectory, "runsT1");
+        RunT2Directory  = Path.Combine(rootDirectory, executionDataDirectory, "runsT2");
+        SortedDirectory = Path.Combine(rootDirectory, executionDataDirectory, "sorted-files");
 
         try
         {
+            Console.WriteLine("Criando pastas para a operação...");
             Directory.CreateDirectory(Path.Combine(rootDirectory + executionDataDirectory));
             Directory.CreateDirectory(RunT1Directory);
             Directory.CreateDirectory(RunT2Directory);
+            Directory.CreateDirectory(SortedDirectory);
         }
         catch (Exception e)
         {
@@ -140,9 +144,89 @@ class Operator
         Console.WriteLine($"[FINAL] Quantidade total páginas LIDAS na operação: {readPageCounter}"); //Confusão de nomenclatura e gerou essa nóia de ser sempre a quantidade de páginas cheia + o quebrado das tuplas. Aqui tem que ter mais 1.
         Console.WriteLine($"[FINAL] Quantidade total tuplas LIDAS na operação: {readPageCounter * 10 + readTupleCounter}");
         Console.WriteLine($"*---Final das runs da tabela 1---*");
+            
+        //Merge
+        Console.WriteLine("\n*---Iniciando merge para a Tabela 1---*");
+        
+        string finalOutputFile = Path.Combine(SortedDirectory, "T1_sorted.txt");
+        MergeRuns(RunT1Directory, Table1.Name, KeyOnTable1, finalOutputFile);
+        
+        Console.WriteLine($"*---Merge da Tabela 1 finalizado.---*");
     }
 
-    public void MergeRuns()
-    {}
+    //Realiza o merge dos arquivos de run no diretório informado
+    public void MergeRuns(string runDirectory, string tableName, string keyColumnName, string outputFilePath)
+    {
+        var runFiles = Directory.GetFiles(runDirectory, $"run_*_{tableName}.txt");
+        if (runFiles.Length == 0) return;
 
+        // Declaração explícita: Guardamos uma tupla e a prioridade é um 'int'.
+        var priorityQueue = new PriorityQueue<(string Line, int ReaderIndex), int>();
+        var readers = new List<StreamReader>();
+
+        try
+        {
+            for (int i = 0; i < runFiles.Length; i++)
+            {
+                var reader = new StreamReader(runFiles[i]);
+                readers.Add(reader);
+                if (!reader.EndOfStream && reader.ReadLine() is string line && !string.IsNullOrWhiteSpace(line))
+                {
+                    // Calculamos a prioridade e a passamos diretamente no Enqueue.
+                    int priority = GetKeyFromLine(line, tableName, keyColumnName);
+                    priorityQueue.Enqueue((line, i), priority);
+                }
+            }
+
+            using (var writer = new StreamWriter(outputFilePath))
+            {
+                while (priorityQueue.Count > 0)
+                {
+                    // O Dequeue continua simples, ele já sabe quem tem a menor prioridade.
+                    var (line, readerIndex) = priorityQueue.Dequeue();
+                    writer.WriteLine(line);
+
+                    if (!readers[readerIndex].EndOfStream && readers[readerIndex].ReadLine() is string nextLine && !string.IsNullOrWhiteSpace(nextLine))
+                    {
+                        int nextPriority = GetKeyFromLine(nextLine, tableName, keyColumnName);
+                        priorityQueue.Enqueue((nextLine, readerIndex), nextPriority);
+                    }
+                }
+            }
+        }
+        finally
+        {
+            readers.ForEach(reader => reader.Dispose());
+        }
+    }
+
+    /// <summary>
+    /// Função auxiliar privada para extrair a chave numérica de uma linha de texto.
+    /// Centraliza a lógica de parsing e obtenção do índice.
+    /// </summary>
+    private int GetKeyFromLine(string line, string tableName, string keyColumnName)
+    {
+        const string delimiter = ", ";
+        int keyIndex;
+
+        // Lógica de índice replicada da sua AuxClass
+        if (tableName == "uva.csv")
+        {
+            if (keyColumnName == "uva_id") keyIndex = 0;
+            else keyIndex = 4;
+        }
+        else if (tableName == "vinho.csv")
+        {
+            if (keyColumnName == "vinho_id") keyIndex = 0;
+            else if (keyColumnName == "uva_id") keyIndex = 3;
+            else keyIndex = 4;
+        }
+        else
+        {
+            keyIndex = 0;
+        }
+
+        string keyAsString = line.Split(delimiter)[keyIndex].Trim();
+        return int.Parse(keyAsString);
+    }
 }
