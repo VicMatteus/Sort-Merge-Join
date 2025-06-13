@@ -13,7 +13,7 @@ namespace sort_merge_join
 
             bool isLinux = true;
             // Operator op = new Operator(new Table("vinho.csv"), new Table("uva.csv"), "uva_id", "uva_id");
-            Operator op = new Operator(new Table("vinho.csv"), new Table("uva.csv"), "pais_producao_id", "pais_origem_id");
+            Operator op = new Operator(new Table("uva.csv"), new Table("pais.csv"), "pais_origem_id", "pais_id");
             op.DoOperation();
         }
     }
