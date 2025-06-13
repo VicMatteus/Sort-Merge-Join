@@ -100,7 +100,7 @@ class Operator
             Console.WriteLine($"[PARCIAL] Quantidade de tuplas ESCRITAS na última run {run_counter}: {writtenPageCounter * 10 + writtenTupleCounter}");
 
             //Escreve as páginas que leu(4, no máximo) em um arquivo temporário ordenado(até 40 tuplas) - run_N_tabela.txt
-            File.AppendAllText(Path.Combine(RunT1Directory, $"run_{run_counter}_{table_name}.txt"), result);
+            File.AppendAllText(Path.Combine(RunT1Directory, $"run_0_{run_counter}.txt"), result);
             result = "";
 
             Table1.FreeFromMemo(); //Garante que não se contamine com tuplas da run passada
@@ -132,7 +132,7 @@ class Operator
 
 
             //Escreve as páginas que leu(4, no máximo) em um arquivo temporário ordenado(até 40 tuplas) - run_N_tabela.txt
-            File.AppendAllText(Path.Combine(RunT1Directory, $"run_{run_counter}_{table_name}.txt"), result);
+            File.AppendAllText(Path.Combine(RunT1Directory, $"run_0_{run_counter}.txt"), result);
             result = "";
             Table1.FreeFromMemo();
         }
@@ -149,84 +149,68 @@ class Operator
         Console.WriteLine("\n*---Iniciando merge para a Tabela 1---*");
         
         string finalOutputFile = Path.Combine(SortedDirectory, "T1_sorted.txt");
-        MergeRuns(RunT1Directory, Table1.Name, KeyOnTable1, finalOutputFile);
+        // MergeRuns(RunT1Directory);
         
         Console.WriteLine($"*---Merge da Tabela 1 finalizado.---*");
     }
 
-    //Realiza o merge dos arquivos de run no diretório informado
-    public void MergeRuns(string runDirectory, string tableName, string keyColumnName, string outputFilePath)
+    public void MergeRuns(bool isTable1, int runAmmount, string outputDirectory)
     {
-        var runFiles = Directory.GetFiles(runDirectory, $"run_*_{tableName}.txt");
-        if (runFiles.Length == 0) return;
+        int level = 0;
 
-        // Declaração explícita: Guardamos uma tupla e a prioridade é um 'int'.
-        var priorityQueue = new PriorityQueue<(string Line, int ReaderIndex), int>();
-        var readers = new List<StreamReader>();
-
-        try
+        int pageOffsetAux1 = 0; 
+        int pageOffsetAux2 = 0; 
+        int pageOffsetAux3 = 0; 
+        
+        for (int i = 0; i < runAmmount; i++)
         {
-            for (int i = 0; i < runFiles.Length; i++)
-            {
-                var reader = new StreamReader(runFiles[i]);
-                readers.Add(reader);
-                if (!reader.EndOfStream && reader.ReadLine() is string line && !string.IsNullOrWhiteSpace(line))
-                {
-                    // Calculamos a prioridade e a passamos diretamente no Enqueue.
-                    int priority = GetKeyFromLine(line, tableName, keyColumnName);
-                    priorityQueue.Enqueue((line, i), priority);
-                }
-            }
+            List<Array> run_A = ReadRun(true, i.ToString(), level.ToString(), pageOffsetAux1);
+            List<Array> run_B = ReadRun(true, i.ToString(), level.ToString(), pageOffsetAux2);
+            List<Array> run_C = ReadRun(true, i.ToString(), level.ToString(), pageOffsetAux3);
 
-            using (var writer = new StreamWriter(outputFilePath))
-            {
-                while (priorityQueue.Count > 0)
-                {
-                    // O Dequeue continua simples, ele já sabe quem tem a menor prioridade.
-                    var (line, readerIndex) = priorityQueue.Dequeue();
-                    writer.WriteLine(line);
-
-                    if (!readers[readerIndex].EndOfStream && readers[readerIndex].ReadLine() is string nextLine && !string.IsNullOrWhiteSpace(nextLine))
-                    {
-                        int nextPriority = GetKeyFromLine(nextLine, tableName, keyColumnName);
-                        priorityQueue.Enqueue((nextLine, readerIndex), nextPriority);
-                    }
-                }
-            }
         }
-        finally
-        {
-            readers.ForEach(reader => reader.Dispose());
-        }
+        
+        //Ler 3 runs
+        //comparar o primeiro elemento de cada run e pegar o menor
+        //colocar o menor em uma lista
+        //repetir até ter 10 na lista
+        //escrever no banco e zerar a lista
+        //caso uma run zere, leio mais 10
+        //separar resultados em pastas de nível para organizar mais 
     }
 
-    /// <summary>
-    /// Função auxiliar privada para extrair a chave numérica de uma linha de texto.
-    /// Centraliza a lógica de parsing e obtenção do índice.
-    /// </summary>
-    private int GetKeyFromLine(string line, string tableName, string keyColumnName)
+    public List<Array> ReadRun(bool isTable1, string run_number, string run_level, int pageOffset)
     {
-        const string delimiter = ", ";
-        int keyIndex;
+        //Dados do arquivo da run
+        string run_path = isTable1 ? RunT1Directory : RunT2Directory;
+        string run_file_name = $"run_{run_level}_{run_number}.txt";
+        string full_file_path = Path.Combine(run_path, run_file_name);
 
-        // Lógica de índice replicada da sua AuxClass
-        if (tableName == "uva.csv")
+        string line = "";
+        List<Array> tuples = new List<Array>();
+        
+        if (!File.Exists(full_file_path))
+            throw new FileNotFoundException($"Erro ao tentar ler a run informada: {full_file_path}");
+        
+        using StreamReader reader = new StreamReader(full_file_path);
+        
+        //Pula paginas
+        if (pageOffset != 0)
         {
-            if (keyColumnName == "uva_id") keyIndex = 0;
-            else keyIndex = 4;
-        }
-        else if (tableName == "vinho.csv")
-        {
-            if (keyColumnName == "vinho_id") keyIndex = 0;
-            else if (keyColumnName == "uva_id") keyIndex = 3;
-            else keyIndex = 4;
-        }
-        else
-        {
-            keyIndex = 0;
+            for (int i = 0; i < pageOffset * 10; i++)
+            {
+                line = reader.ReadLine();
+            }
         }
 
-        string keyAsString = line.Split(delimiter)[keyIndex].Trim();
-        return int.Parse(keyAsString);
+        for (int i = 0; i < 10; i++)
+        {
+            line = reader.ReadLine();
+            if (line == null)
+                break;
+            tuples.Add(line.Split(","));
+        }
+
+        return tuples;
     }
 }
