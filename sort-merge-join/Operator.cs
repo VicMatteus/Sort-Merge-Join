@@ -5,7 +5,7 @@ namespace sort_merge_join;
 
 class Operator
 {
-    static bool isLinux = true;
+    static bool isLinux = false;
     private string rootDirectory { get; set; } = isLinux ? @"/home/vitor/tmp/sort_merge_join/" : @"C:\temp\sort_merge_join\"; //Windows
     private string RunT1Directory { get; set; }
     private string RunT2Directory { get; set; }
@@ -19,19 +19,19 @@ class Operator
     public Operator(Table table1, Table table2, string keyOnTable1, string keyOnTable2)
     {
         //Cria a pasta da execução atual -> Isso será movido para o operador.
-        string executionDataDirectory = DateTime.Now.ToString(new CultureInfo("de-DE")).Replace(" ", "-") + "/";
-        RunT1Directory = rootDirectory + executionDataDirectory + "runsT1/";
-        RunT2Directory = rootDirectory + executionDataDirectory + "runsT2/";
+        string executionDataDirectory = DateTime.Now.ToString(new CultureInfo("de-DE")).Replace(" ", "-").Replace(":", ".");
+        RunT1Directory = Path.Combine(rootDirectory, executionDataDirectory, "runsT1");
+        RunT2Directory = Path.Combine(rootDirectory, executionDataDirectory, "runsT2");
 
         try
         {
-            Directory.CreateDirectory(rootDirectory + executionDataDirectory);
+            Directory.CreateDirectory(Path.Combine(rootDirectory + executionDataDirectory));
             Directory.CreateDirectory(RunT1Directory);
             Directory.CreateDirectory(RunT2Directory);
         }
         catch (Exception e)
         {
-            Console.WriteLine("Erro ao criar o diretório com dados de execução.");
+            throw new Exception("Erro ao criar o diretório com dados de execução.");
             return;
         }
 
@@ -96,7 +96,7 @@ class Operator
             Console.WriteLine($"[PARCIAL] Quantidade de tuplas ESCRITAS na última run {run_counter}: {writtenPageCounter * 10 + writtenTupleCounter}");
 
             //Escreve as páginas que leu(4, no máximo) em um arquivo temporário ordenado(até 40 tuplas) - run_N_tabela.txt
-            File.AppendAllText(RunT1Directory + $"run_{run_counter}_{table_name}.txt", result);
+            File.AppendAllText(Path.Combine(RunT1Directory, $"run_{run_counter}_{table_name}.txt"), result);
             result = "";
 
             Table1.FreeFromMemo(); //Garante que não se contamine com tuplas da run passada
@@ -128,7 +128,7 @@ class Operator
 
 
             //Escreve as páginas que leu(4, no máximo) em um arquivo temporário ordenado(até 40 tuplas) - run_N_tabela.txt
-            File.AppendAllText(RunT1Directory + $"run_{run_counter}_{table_name}.txt", result);
+            File.AppendAllText(Path.Combine(RunT1Directory, $"run_{run_counter}_{table_name}.txt"), result);
             result = "";
             Table1.FreeFromMemo();
         }
